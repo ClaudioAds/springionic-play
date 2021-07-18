@@ -3,9 +3,15 @@ package com.springionic.java.service;
 import com.springionic.java.domain.Pedido;
 import org.springframework.mail.SimpleMailMessage;
 
-public interface EmailService {
+import javax.mail.internet.MimeMessage;
 
+public interface EmailService {
+//========= Versão para texto plano
     void sendOrderConfirmationEmail(Pedido obj);
 
     void sendEmail(SimpleMailMessage obj);
+//=========== Versão para texto html
+    void sendOrderConfirmationHtmlEmail(Pedido obj);
+
+    void sendHtmlEmail(MimeMessage msg);
 }
