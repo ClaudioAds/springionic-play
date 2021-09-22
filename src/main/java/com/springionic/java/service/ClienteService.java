@@ -4,12 +4,15 @@ import com.springionic.java.domain.Categoria;
 import com.springionic.java.domain.Cidade;
 import com.springionic.java.domain.Cliente;
 import com.springionic.java.domain.Endereco;
+import com.springionic.java.domain.enums.Perfil;
 import com.springionic.java.domain.enums.TipoCliente;
 import com.springionic.java.dto.ClienteDTO;
 import com.springionic.java.dto.ClienteNewDTO;
 import com.springionic.java.repository.CidadeRepository;
 import com.springionic.java.repository.ClienteRepository;
 import com.springionic.java.repository.EnderecoRepository;
+import com.springionic.java.security.UserSS;
+import com.springionic.java.service.exception.AuthorizationExcetion;
 import com.springionic.java.service.exception.DataIntegrityException;
 import com.springionic.java.service.exception.ObjectNotFoundException;
 
@@ -21,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.naming.AuthenticationException;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.List;
@@ -42,6 +46,11 @@ public class ClienteService {
     private BCryptPasswordEncoder be;
 
     public Cliente find(Integer id) {
+        UserSS user = UserService.authenticated();
+        if (user == null || !user.hasRole(Perfil.ADMIN) && !id.equals(user.getId())) {
+            throw new AuthorizationExcetion("Acesso negado");
+        }
+
         Optional<Cliente> obj = clienteRepository.findById(id);
         return obj.orElseThrow(() -> new ObjectNotFoundException(
                 "Objeto Não Encontrado! Id: " + id + ", Tipo: " + Categoria.class.getName()));
