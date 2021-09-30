@@ -5,6 +5,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.springionic.java.service.exception.FileException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,21 +38,21 @@ public class S3Service {
 
             return uploadFile(is, fileName, contentType);
         } catch (IOException e) {
-            throw new RuntimeException("Erro de IO: " + e.getMessage());
+            throw new FileException("Erro de IO: " + e.getMessage());
         }
     }
 
     public URI uploadFile(InputStream is, String fileName, String contentType) {
         try {
             ObjectMetadata metadata = new ObjectMetadata();
-
+            metadata.setContentType(contentType);
             LOG.info("Iniciando Upload: ");
             s3cliente.putObject(bucketName, fileName, is, metadata);
             LOG.info("Finalizando Upload: ");
 
             return s3cliente.getUrl(bucketName, fileName).toURI();
         } catch (URISyntaxException e) {
-            throw new RuntimeException("Erro ao converter URL para URI");
+            throw new FileException("Erro ao converter URL para URI");
         }
     }
 }
