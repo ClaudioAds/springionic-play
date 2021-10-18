@@ -1,18 +1,16 @@
 package com.springionic.java.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.springionic.java.domain.enums.Perfil;
+import com.springionic.java.domain.enums.TipoCliente;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.springionic.java.domain.enums.Perfil;
-import com.springionic.java.domain.enums.TipoCliente;
-import org.springframework.security.core.parameters.P;
 
 @Entity
 public class Cliente implements Serializable {
@@ -46,6 +44,8 @@ public class Cliente implements Serializable {
     @ElementCollection(fetch=FetchType.EAGER)
     @CollectionTable(name="PERFIS")
     private Set<Integer> perfis = new HashSet<>();
+
+    private String imageUrl;
 
     public Cliente() {
         addPerfil(Perfil.CLIENTE);
@@ -167,4 +167,11 @@ public class Cliente implements Serializable {
         return true;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

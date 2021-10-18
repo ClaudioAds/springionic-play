@@ -25,7 +25,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.naming.AuthenticationException;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.net.URI;
@@ -123,6 +122,18 @@ public class ClienteService {
     }
 
     public URI uploadProfilePicture(MultipartFile multipartFile) {
-        return s3Service.uploadFile(multipartFile);
+        //verificando se tem uruario logado
+        UserSS user = UserService.authenticated();
+        if (user == null) {
+            throw new AuthorizationExcetion("Acesso negado");
+        }
+
+        URI uri = s3Service.uploadFile(multipartFile);
+
+        Cliente cliente = find(user.getId());
+        cliente.setImageUrl(uri.toString());
+        clienteRepository.save(cliente);
+
+        return uri;
     }
 }
