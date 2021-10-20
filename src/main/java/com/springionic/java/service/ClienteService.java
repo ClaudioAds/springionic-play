@@ -17,6 +17,7 @@ import com.springionic.java.service.exception.DataIntegrityException;
 import com.springionic.java.service.exception.ObjectNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +50,12 @@ public class ClienteService {
 
     @Autowired
     private S3Service s3Service;
+
+    @Autowired
+    private ImageService imageService;
+
+    @Value("${img.prefix.client.profile}")
+    private String prefix;
 
     public Cliente find(Integer id) {
         UserSS user = UserService.authenticated();
@@ -128,12 +136,10 @@ public class ClienteService {
             throw new AuthorizationExcetion("Acesso negado");
         }
 
-        URI uri = s3Service.uploadFile(multipartFile);
+        BufferedImage jpgImage = imageService.getJpgImageFromFile(multipartFile);
+        //agora montar o nome do arquivo com base no cliente logado
+        String fileName = prefix + user.getId() + ".jpg";
 
-        Cliente cliente = find(user.getId());
-        cliente.setImageUrl(uri.toString());
-        clienteRepository.save(cliente);
-
-        return uri;
+        return s3Service.uploadFile(imageService.getInputStream(jpgImage, "jpg"), fileName, "image");
     }
 }
