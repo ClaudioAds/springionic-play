@@ -2,6 +2,7 @@ package com.springionic.java.service;
 
 import com.springionic.java.service.exception.FileException;
 import org.apache.commons.io.FilenameUtils;
+import org.imgscalr.Scalr;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,5 +51,22 @@ public class ImageService {
         } catch (IOException e) {
             throw new FileException("Erro ao ler o arquivo");
         }
+    }
+
+    //método para cortar (cropar) a imagem para o nosso tamanho especificado no properties
+    public BufferedImage cropImage(BufferedImage sourceImg) {
+        //Um tipo de IF... Se a altura for <= largura então é a altura, se não a largura
+        int min = (sourceImg.getHeight() <= sourceImg.getWidth()) ? sourceImg.getHeight() : sourceImg.getWidth();
+        return Scalr.crop(
+                sourceImg,
+                (sourceImg.getWidth() / 2) - (min / 2), // vai no meio da largura menos a metade do minimo
+                (sourceImg.getHeight() / 2) - (min / 2), // vai no meio da altura menos a metade do minimo
+                min,
+                min);
+    }
+
+    //função para redimensionar uma imagem
+    public BufferedImage resize(BufferedImage sourceImage, int size) {
+        return Scalr.resize(sourceImage, Scalr.Method.ULTRA_QUALITY, size);//para manter a melhor qualidade da imagem
     }
 }
