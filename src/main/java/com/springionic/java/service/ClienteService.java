@@ -81,7 +81,21 @@ public class ClienteService {
 
     public List<Cliente> findAll() {
         return clienteRepository.findAll();
+    }
 
+    public Cliente findByEmail(String email) {
+
+        UserSS user = UserService.authenticated();
+        if (user == null || !user.hasRole(Perfil.ADMIN) && !email.equals(user.getUsername())) {
+            throw new AuthorizationExcetion("Acesso negado");
+        }
+
+        Cliente obg = clienteRepository.findByEmail(email);
+        if (obg == null) {
+            throw new ObjectNotFoundException("Objeto não encontrado! Id: " + user.getId()
+                    + ", Tipo: " + Cliente.class.getName());
+        }
+        return obg;
     }
 
     public Cliente update(Cliente obj) {
@@ -90,7 +104,6 @@ public class ClienteService {
         return clienteRepository.save(newObj);
     }
 
-
     public void delete(Integer id) {
         find(id);
         try {
@@ -98,7 +111,6 @@ public class ClienteService {
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível excluir um Cliente que possui pedidos");
         }
-
     }
 
     public Page<Cliente> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
@@ -117,6 +129,7 @@ public class ClienteService {
         Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(), objDto.getBairro(), objDto.getCep(), cli, cid);
         cli.getEnderecos().add(end);
         cli.getTelefones().add(objDto.getTelefone1());
+
         if (objDto.getTelefone2() != null) {
             cli.getTelefones().add(objDto.getTelefone2());
         }
@@ -142,7 +155,6 @@ public class ClienteService {
         BufferedImage jpgImage = imageService.getJpgImageFromFile(multipartFile);
         jpgImage = imageService.cropImage(jpgImage);
         jpgImage = imageService.resize(jpgImage, size);
-
 
         //agora montar o nome do arquivo com base no cliente logado
         String fileName = prefix + user.getId() + ".jpg";
