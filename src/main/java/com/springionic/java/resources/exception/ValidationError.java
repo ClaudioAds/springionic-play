@@ -12,7 +12,7 @@ public class ValidationError extends StandardError{
         super(timeStamp, status, error, msg, path);
     }
 
-    public List<FieldMessage> getErros() {
+    public List<FieldMessage> getErrors() {
         return errors;
     }
 
